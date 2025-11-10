@@ -96,7 +96,7 @@ return      {
             }
 
 int         { 
-                loglist="Line no "+to_string(lines)+": Token <INT> Lexeme "+yytext+" Paisi"+"\n"+"\n";
+                loglist="Line no "+to_string(lines)+": Token <INT> Lexeme "+yytext+" found"+"\n"+"\n";
 			    outlog<<loglist; 
                 return INT; 
             }
