@@ -17,3 +17,12 @@ f. Help students to learn about how to generate codes for target programming lan
 ## Playlist
 
     https://youtube.com/playlist?list=PLsvKNqBM7Yn3Qa0UWQ_R2MzGFTkzCYYcj
+
+
+## Lab Recordings
+
+### Lab1
+    https://youtu.be/LY8vJqHOkRs
+    
+### Lab2
+    https://youtu.be/_EJHBAeILN8
