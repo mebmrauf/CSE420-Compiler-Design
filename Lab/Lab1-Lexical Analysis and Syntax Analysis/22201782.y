@@ -392,7 +392,7 @@ int main(int argc, char *argv[])
 		return 0;
     	}
 	yyin = fopen(argv[1], "r");
-	outlog.open("22101783+22201782.txt", ios::trunc);
+	outlog.open("22201782+22101783.txt", ios::trunc);
 	
 	if(yyin == NULL)
 	{
