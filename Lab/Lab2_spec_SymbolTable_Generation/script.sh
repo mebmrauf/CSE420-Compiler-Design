@@ -8,6 +8,6 @@ g++ -fpermissive -w -c -o l.o lex.yy.c
 echo 'Generated the scanner object file'
 g++ y.o l.o
 echo 'All ready, running'
-./a.out input.c
+./a.exe input.c
 echo 'logfile'
 cat 22101783+22201782_output_log.txt
