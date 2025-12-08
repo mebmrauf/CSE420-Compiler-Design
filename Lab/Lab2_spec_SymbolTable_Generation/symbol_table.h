@@ -1,97 +1,95 @@
 #include "scope_table.h"
-#include <fstream>
-#include <iostream>
 
 class symbol_table
 {
 private:
     scope_table *current_scope;
-    int bucket_count;
+    int table_size;
     int current_scope_id;
 
 public:
-    symbol_table(int bucket_count) {
-        this->bucket_count = bucket_count;
+    symbol_table(int table_size){
+        this->table_size = table_size;
         this->current_scope_id = 1;
-        current_scope = new scope_table(bucket_count, current_scope_id, nullptr);
+        current_scope = new scope_table(table_size, current_scope_id, NULL);
     }
 
-    void initialize_scope_1(vector<pair<string,string>>& params) {
-        for(auto param : params) {
-            symbol_info* param_symbol = new symbol_info(param.second, "ID");
-            param_symbol->set_data_type(param.first);
-            current_scope->insert_in_scope(param_symbol);
-        }
-    }
-
-    void enter_scope() {
+    
+    void enter_scope(){
         current_scope_id++;
-        scope_table* new_scope = new scope_table(bucket_count, current_scope_id, current_scope);
+        scope_table *new_scope = new scope_table(table_size, current_scope_id, current_scope);
         current_scope = new_scope;
     }
-
-
-    void exit_scope() {
-        if(current_scope != nullptr) {
-            scope_table* parent = current_scope->get_parent_scope();
-            delete current_scope;
-            current_scope = parent;
+    void exit_scope(){
+        if(current_scope != NULL){
+            scope_table *temp = current_scope;
+            current_scope = current_scope->get_parent_scope();
+            delete temp;
         }
     }
 
-    bool insert(symbol_info* symbol) {
-        return current_scope->insert_in_scope(symbol);
+    bool insert(symbol_info* symbol){
+        if(current_scope == NULL){
+            return false; // no current scope to insert
+        }
+        if(current_scope->insert_in_scope(symbol)){
+            return true; // symbol inserted
+        } 
+        else {
+            return false; // symbol already exists
+        }
     }
 
-    int get_current_id() {
-        return current_scope ? current_scope->get_unique_id() : 0;
-    }
-
-    symbol_info* lookup(symbol_info* symbol) {
-        scope_table* temp = current_scope;
-        while(temp != nullptr) {
-            symbol_info* result = temp->lookup_in_scope(symbol);
-            if(result != nullptr) {
-                return result;
+    
+    symbol_info* lookup(symbol_info* symbol){
+        if(current_scope == NULL){
+            return NULL; // no current scope to lookup
+        }
+        scope_table *temp = current_scope;
+        while(temp != NULL){
+            symbol_info* found_symbol = temp->lookup_in_scope(symbol);
+            if(found_symbol != NULL){
+                return found_symbol; // symbol found in current scope
             }
-            temp = temp->get_parent_scope();
+            temp = temp->get_parent_scope(); // move to parent scope
         }
-        return nullptr;
+        return NULL; // symbol not found in any scope
     }
 
+    void print_current_scope(){
+        if(current_scope != NULL){
+            outlog << endl << "################################" << endl << endl;
 
-    void print_current_scope(std::ofstream& outlog) {
-        if(current_scope != nullptr) {
-            current_scope->print_scope_table(outlog);
+            //print all scope from current scope to top
+            scope_table *temp = current_scope;
+            while(temp != NULL){
+                temp->print_scope_table(outlog);
+                temp = temp->get_parent_scope(); // move to parent scope
+            }
+
+            outlog << "################################" << endl << endl;
         }
     }
 
+    void print_all_scopes(ofstream& outlog){
+        // outlog << "Symbol Table" << endl << endl;
+        outlog << "################################" << endl << endl;
 
-    void print_all_scopes(std::ofstream& outlog) {
-        outlog << "################################" << std::endl << std::endl;
-        scope_table* temp = current_scope;
-        while(temp != nullptr) {
+        scope_table *temp = current_scope;
+        while(temp != NULL){
             temp->print_scope_table(outlog);
-            temp = temp->get_parent_scope();
+            temp = temp->get_parent_scope(); // move to parent scope
         }
-        outlog << "################################" << std::endl << std::endl;
+
+        outlog << "################################" << endl << endl;
     }
 
-    // Destructor
-    ~symbol_table() {
-        while(current_scope != nullptr) {
-            exit_scope();
-        }
-    }
+    // you can add more methods if you need 
 
-    scope_table* get_parent_scope() {
-        if(current_scope) {
-            return current_scope->get_parent_scope();
+    symbol_info *lookup_current_scope(symbol_info *symbol){
+        if(current_scope == NULL){
+            return NULL; // no current scope to lookup
         }
-        return nullptr;
-    }
-
-    scope_table* get_current_scope() {
-        return current_scope;
+        return current_scope->lookup_in_scope(symbol); // lookup in current scope only
     }
 };

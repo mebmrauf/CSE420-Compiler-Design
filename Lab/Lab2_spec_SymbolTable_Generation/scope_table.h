@@ -1,107 +1,138 @@
 #include "symbol_info.h"
 
+
+extern ofstream outlog; // output file stream for logging
+
 class scope_table
 {
 private:
-    int bucket_count;
-    int unique_id;
+    int table_size;
+    int table_id;
     scope_table *parent_scope = NULL;
     vector<list<symbol_info *>> table;
 
     int hash_function(string name)
     {
-        int hash_val = 7; 
-        for(char c : name) {
-            hash_val = (hash_val + c) % bucket_count;
+        // write your hash function here
+        int hash = 0;
+        for (char c : name) {
+            hash += c;
         }
-        return hash_val;
+        return hash % table_size;
     }
 
 public:
-    scope_table(int bucket_count, int unique_id, scope_table* parent_scope) {
-        this->bucket_count = bucket_count;
-        this->unique_id = unique_id;
-        this->parent_scope = parent_scope;
-        table.resize(bucket_count);
-    }
+scope_table(){
+    this->table_size = 10;
+    this->table_id = 1;
+    this->table.resize(table_size);
+    outlog << "New ScoopeTable with id " << table_id << " created" << endl << endl;
+}
+scope_table(int table_size, int table_id, scope_table *parent_scope){
+    this->table_size = table_size;
+    this->table_id = table_id;
+    this->parent_scope = parent_scope;
+    this->table.resize(table_size);
+    outlog << "New ScoopeTable with id " << table_id << " created" << endl << endl;
+}
+scope_table *get_parent_scope(){
+    return this->parent_scope;
+}
 
-    scope_table* get_parent_scope() {
-        return parent_scope;
-    }
+int get_table_id(){
+    return this->table_id;
+}
+symbol_info *lookup_in_scope(symbol_info* symbol){
+    int index = hash_function(symbol->get_name());
 
-    int get_unique_id() {
-        return unique_id;
-    }
-
-    symbol_info* lookup_in_scope(symbol_info* symbol) {
-        int index = hash_function(symbol->get_name());
-        for(symbol_info* s : table[index]) {
-            if(s->get_name() == symbol->get_name()) {
-                return s;
-            }
+    for(auto& sym : table[index]) { //auto --> symbol_info* sym
+        if(sym->get_name() == symbol->get_name()) {
+            return sym; 
         }
-        return nullptr;
     }
+    return NULL;
 
-    bool insert_in_scope(symbol_info* symbol) {
-        if(lookup_in_scope(symbol) != nullptr) {
-            return false;  // Already exists
+}
+
+bool insert_in_scope(symbol_info* symbol){
+    if(lookup_in_scope(symbol) != NULL) {
+        return false; // symbol already exists in the current scope
+    }
+    int index = hash_function(symbol->get_name());
+    table[index].push_back(symbol);
+    return true;
+}
+
+
+bool delete_from_scope(symbol_info* symbol){
+    int index = hash_function(symbol->get_name());
+    for(auto it = table[index].begin(); it != table[index].end(); ++it) {
+        if((*it)->get_name() == symbol->get_name()) {
+            table[index].erase(it); // remove from the list
+            return true;
         }
-
-        int index = hash_function(symbol->get_name());
-        table[index].push_back(symbol);
-        return true;
     }
+    return false; // symbol not found in the current scope
+}
 
-    bool delete_from_scope(symbol_info* symbol) {
-        int index = hash_function(symbol->get_name());
-        for(auto it = table[index].begin(); it != table[index].end(); ++it) {
-            if((*it)->get_name() == symbol->get_name()) {
-                table[index].erase(it);
-                return true;
-            }
+void print_scope_table(ofstream& outlog);
+
+~scope_table(){
+    if(table_id != 1){
+        outlog << "ScopeTable with ID " << table_id << " removed" << endl << endl;
+    }
+    for(auto& bucket : table) {
+        for(auto& symbol : bucket) {
+            delete symbol; 
         }
-        return false;
+        bucket.clear();
     }
+    this->table.clear();
+}
 
-    void print_scope_table(ofstream& outlog) {
-        outlog << "ScopeTable # " << unique_id << endl;
-        for(int i = 0; i < bucket_count; i++) {
-            if(!table[i].empty()) {
-                outlog << i << " --> " << endl;
-                for(symbol_info* symbol : table[i]) {
-                    outlog << "< " << symbol->get_name() << " : " << symbol->get_type() << " >" << endl;
-                    if(symbol->is_array()) {
-                        outlog << "Array" << endl;
-                        outlog << "Type: " << symbol->get_data_type() << endl;
-                        outlog << "Size: " << symbol->get_array_size();
-                    } else if(symbol->is_function()) {
-                        outlog << "Function Definition" << endl;
-                        outlog << "Return Type: " << symbol->get_data_type() << endl;
-                        outlog << "Number of Parameters: " << symbol->get_parameters().size() << endl;
-                        outlog << "Parameter Details: ";
-                        auto params = symbol->get_parameters();
-                        for(int i = 0; i < params.size(); i++) {
-                            outlog << params[i].first << " " << params[i].second;
-                            if(i < params.size() - 1) outlog << ", ";
+    // you can add more methods if you need
+};
+
+// complete the methods of scope_table class
+void scope_table::print_scope_table(ofstream& outlog)
+{
+    outlog << "ScopeTable # "+ to_string(table_id) << endl;
+    for(int i = 0; i < table_size; i++) {
+        if(table[i].size() > 0){
+            outlog << i << " --> " << endl;
+            for(auto& symbol : table[i]) {
+                outlog << "< " << symbol->get_name() << " : " << symbol->get_type() << " > " << endl;
+
+                if(symbol->get_type_id() == 0){
+                    outlog << "Variable" << endl;
+                    outlog << "Type: " << symbol->get_data_type() << endl;
+                }
+                else if(symbol->get_type_id() == 1){
+                    outlog << "Array" << endl;
+                    outlog << "Type: " << symbol->get_data_type() << endl;
+                    outlog << "Size: " << symbol->get_array_size() << endl;
+                }
+                else{
+                    outlog << "Function Definition" << endl;
+                    outlog << "Return Type: " << symbol->get_return_type() << endl;
+                    vector<pair<string, string>> parameters = symbol->get_parameters();
+                    outlog << "Parameters: " << parameters.size() << endl;
+                    outlog << "Parameter Details: ";
+                    for(int j = 0; j < parameters.size(); j++){
+                        if(j == parameters.size() - 1){
+                            outlog << parameters[j].first << " " << parameters[j].second;
                         }
-                    } else {
-                        outlog << "Variable" << endl;
-                        outlog << "Type: " << symbol->get_data_type();
+                        else{
+                            outlog << parameters[j].first << " " << parameters[j].second << ", ";
+                        }
                     }
-                    outlog << endl << endl;
+                    outlog << endl;
                 }
             }
+            outlog << endl;
         }
     }
+    outlog << endl;
 
-    ~scope_table() {
-        for(auto& bucket : table) {
-            for(auto symbol : bucket) {
-                delete symbol;
-            }
-            bucket.clear();
-        }
-        table.clear();
-    }
-};
+    //iterate through the current scope table and print the symbols and all relevant information
+}

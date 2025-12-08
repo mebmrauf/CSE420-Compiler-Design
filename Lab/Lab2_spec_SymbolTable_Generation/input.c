@@ -1,13 +1,24 @@
-int func(int a, float b) {
-    return a+b;
-}
+int func() {
 
-void main () {
-    int a, b, c, i;
-    int e, f[10], g[11];
-    a = 1;
-    b = 2;
-    c = func(a, b);
+    int a;
 
-    float d;
+    if (a>1){
+        float a;
+
+        if (a>1) {
+            int a;
+
+             if (a>1) {
+                float a;
+
+                if (a>1) {
+                    int a;
+
+                    if (a>1) {
+                        float a;
+                    }
+                }
+             }
+        }
+    }
 }
