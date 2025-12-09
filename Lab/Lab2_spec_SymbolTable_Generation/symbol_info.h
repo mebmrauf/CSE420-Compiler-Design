@@ -23,7 +23,6 @@ public:
     symbol_info(string name, string type)
     {
         this->name = name;
-        // this->type = type;
         this->type = type;
         this->next = NULL;
         this->type_id = 0; // 0 for variable
