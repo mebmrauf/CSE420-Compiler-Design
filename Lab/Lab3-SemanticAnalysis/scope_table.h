@@ -22,18 +22,12 @@ private:
     }
 
 public:
-scope_table(){
-    this->table_size = 10;
-    this->table_id = 1;
-    this->table.resize(table_size);
-    outlog << "New ScoopeTable with id " << table_id << " created" << endl << endl;
-}
 scope_table(int table_size, int table_id, scope_table *parent_scope){
+    outlog << "New ScopeTable with ID " << table_id << " created" << endl << endl;
     this->table_size = table_size;
     this->table_id = table_id;
     this->parent_scope = parent_scope;
     this->table.resize(table_size);
-    outlog << "New ScoopeTable with id " << table_id << " created" << endl << endl;
 }
 scope_table *get_parent_scope(){
     return this->parent_scope;
@@ -55,12 +49,12 @@ symbol_info *lookup_in_scope(symbol_info* symbol){
 }
 
 bool insert_in_scope(symbol_info* symbol){
-    if(lookup_in_scope(symbol) != NULL) {
-        return false; // symbol already exists in the current scope
+    if(lookup_in_scope(symbol) == NULL) {
+        int index = hash_function(symbol->get_name());
+        table[index].push_back(symbol);
+        return true; // symbol inserted successfully
     }
-    int index = hash_function(symbol->get_name());
-    table[index].push_back(symbol);
-    return true;
+    return false; // symbol already exists in the current scope
 }
 
 
@@ -81,11 +75,11 @@ void print_scope_table(ofstream& outlog);
     if(table_id != 1){
         outlog << "ScopeTable with ID " << table_id << " removed" << endl << endl;
     }
-    for(auto& bucket : table) {
-        for(auto& symbol : bucket) {
+    for(auto& temp : table) {
+        for(auto& symbol : temp) {
             delete symbol; 
         }
-        bucket.clear();
+        temp.clear();
     }
     this->table.clear();
 }
@@ -101,20 +95,20 @@ void scope_table::print_scope_table(ofstream& outlog)
         if(table[i].size() > 0){
             outlog << i << " --> " << endl;
             for(auto& symbol : table[i]) {
-                outlog << "< " << symbol->get_name() << " : " << symbol->get_type() << " > " << endl;
+                outlog << "< " << symbol->get_name() << " : ID > " << endl;
 
                 if(symbol->get_type_id() == 0){
                     outlog << "Variable" << endl;
-                    outlog << "Type: " << symbol->get_data_type() << endl;
+                    outlog << "Type: " << symbol->get_type() << endl;
                 }
                 else if(symbol->get_type_id() == 1){
                     outlog << "Array" << endl;
-                    outlog << "Type: " << symbol->get_data_type() << endl;
+                    outlog << "Type: " << symbol->get_type() << endl;
                     outlog << "Size: " << symbol->get_array_size() << endl;
                 }
                 else{
                     outlog << "Function Definition" << endl;
-                    outlog << "Return Type: " << symbol->get_return_type() << endl;
+                    outlog << "Return Type: " << symbol->get_type() << endl;
                     vector<pair<string, string>> parameters = symbol->get_parameters();
                     outlog << "Parameters: " << parameters.size() << endl;
                     outlog << "Parameter Details: ";
@@ -132,7 +126,7 @@ void scope_table::print_scope_table(ofstream& outlog)
             outlog << endl;
         }
     }
-    outlog << endl;
+    // outlog << endl;
 
     //iterate through the current scope table and print the symbols and all relevant information
 }

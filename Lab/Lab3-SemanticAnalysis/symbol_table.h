@@ -10,10 +10,10 @@ private:
 public:
     symbol_table(int table_size){
         this->table_size = table_size;
-        this->current_scope_id = 1;
-        current_scope = new scope_table(table_size, current_scope_id, NULL);
+        this->current_scope_id = 0;
+        current_scope = NULL;
+        enter_scope();
     }
-
     
     void enter_scope(){
         current_scope_id++;
