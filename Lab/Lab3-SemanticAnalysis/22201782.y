@@ -73,8 +73,7 @@ program : program unit
 		outlog<<$1->get_name()<<endl<<endl;
 
 		$$ = new symbol_info($1->get_name(),"program");
-	}
-	;
+	};
 
 unit : var_declaration
 	 {
