@@ -6,6 +6,7 @@
 #include <string>
 #include <fstream>
 #include <map>
+#include <stack>
 
 using namespace std;
 
@@ -57,16 +58,22 @@ public:
     string generate_code(ofstream& outcode, map<string, string>& symbol_to_temp,
                         int& temp_count, int& label_count) const override {
         
+        // Check if this variable has been mapped to a scoped version
+        string actual_name = name;
+        if (symbol_to_temp.find(name) != symbol_to_temp.end()) {
+            actual_name = symbol_to_temp[name];
+        }
+        
         // If it's a simple variable (R-value context)
         if (!index) {
             string t = new_temp(temp_count);
-            outcode << t << " = " << name << endl;
+            outcode << t << " = " << actual_name << endl;
             return t;
         } else {
             // Array access a[i]
             string idx_temp = index->generate_code(outcode, symbol_to_temp, temp_count, label_count);
             string val_temp = new_temp(temp_count);
-            outcode << val_temp << " = " << name << "[" << idx_temp << "]" << endl;
+            outcode << val_temp << " = " << actual_name << "[" << idx_temp << "]" << endl;
             return val_temp;
         }
     }
@@ -166,12 +173,18 @@ public:
                         int& temp_count, int& label_count) const override {
         string t_rhs = rhs->generate_code(outcode, symbol_to_temp, temp_count, label_count);
         
+        // Get the actual mapped name for the variable
+        string actual_name = lhs->get_name();
+        if (symbol_to_temp.find(actual_name) != symbol_to_temp.end()) {
+            actual_name = symbol_to_temp[actual_name];
+        }
+        
         // Check if LHS is array or simple var
         if (lhs->has_index()) {
              string t_idx = lhs->get_index()->generate_code(outcode, symbol_to_temp, temp_count, label_count);
-             outcode << lhs->get_name() << "[" << t_idx << "] = " << t_rhs << endl;
+             outcode << actual_name << "[" << t_idx << "] = " << t_rhs << endl;
         } else {
-             outcode << lhs->get_name() << " = " << t_rhs << endl;
+             outcode << actual_name << " = " << t_rhs << endl;
         }
         
         return t_rhs; // Assignments return the value
@@ -210,6 +223,7 @@ public:
 class BlockNode : public StmtNode {
 private:
     vector<StmtNode*> statements;
+    static int block_id_counter;
 
 public:
     ~BlockNode() {
@@ -224,12 +238,22 @@ public:
     
     string generate_code(ofstream& outcode, map<string, string>& symbol_to_temp,
                         int& temp_count, int& label_count) const override {
+        // Save the current symbol_to_temp state
+        map<string, string> saved_mapping = symbol_to_temp;
+        
         for (auto stmt : statements) {
             stmt->generate_code(outcode, symbol_to_temp, temp_count, label_count);
         }
+        
+        // Restore the previous mapping when exiting the block
+        symbol_to_temp = saved_mapping;
+        
         return "";
     }
 };
+
+// Initialize static member
+int BlockNode::block_id_counter = 0;
 
 // If statement node
 
@@ -254,19 +278,22 @@ public:
         
         string t_cond = condition->generate_code(outcode, symbol_to_temp, temp_count, label_count);
         
+        string label_then = new_label(label_count);
         string label_else = new_label(label_count);
         string label_exit = new_label(label_count);
         
-        // If condition is false, jump to else (or exit if no else)
-        outcode << "if " << t_cond << " == 0 goto " << (else_block ? label_else : label_exit) << endl;
+        // If condition is true, jump to then; otherwise jump to else
+        outcode << "if " << t_cond << " goto " << label_then << endl;
+        outcode << "goto " << label_else << endl;
         
         // Then block
+        outcode << label_then << ":" << endl;
         then_block->generate_code(outcode, symbol_to_temp, temp_count, label_count);
         outcode << "goto " << label_exit << endl;
         
         // Else block
+        outcode << label_else << ":" << endl;
         if (else_block) {
-            outcode << label_else << ":" << endl;
             else_block->generate_code(outcode, symbol_to_temp, temp_count, label_count);
         }
         
@@ -379,6 +406,7 @@ class DeclNode : public StmtNode {
 private:
     string type;
     vector<pair<string, int>> vars; // Variable name and array size (0 for regular vars)
+    static int decl_id_counter;
 
 public:
     DeclNode(string t) : type(t) {}
@@ -395,6 +423,13 @@ public:
                 outcode << "[" << v.second << "]";
             }
             outcode << endl;
+            
+            // Update the mapping: this variable name now refers to itself in this scope
+            // In a real compiler, you'd create a new unique name here
+            // For simplicity, we just keep using the original name
+            // The key insight is that symbol_to_temp is passed by reference
+            // and BlockNode saves/restores it
+            symbol_to_temp[v.first] = v.first;
         }
         return "";
     }
@@ -402,6 +437,9 @@ public:
     string get_type() const { return type; }
     const vector<pair<string, int>>& get_vars() const { return vars; }
 };
+
+// Initialize static member
+int DeclNode::decl_id_counter = 0;
 
 // Function declaration node
 
@@ -433,10 +471,6 @@ public:
             if(i < params.size()-1) outcode << ", ";
         }
         outcode << ")" << endl;
-        
-        // Label for function entry could be added here if needed, 
-        // e.g., outcode << name << ":" << endl;
-        // But code1.txt format suggests implicit entry via source order for this assignment.
         
         if(body) {
             body->generate_code(outcode, symbol_to_temp, temp_count, label_count);
