@@ -14,9 +14,11 @@ e. Help students to understand intermediate codes, and code optimization techniq
 
 f. Help students to learn about how to generate codes for target programming language considering memory, instruction cost, available registers and run-time memory allocation.
 
-## Playlist
+## Lecture Vidoes
 
     https://youtube.com/playlist?list=PLsvKNqBM7Yn3Qa0UWQ_R2MzGFTkzCYYcj
+
+    https://youtube.com/playlist?list=PLM9X445MI6QriAQH-8ncpZW9sXawsbj1B
 
 
 ## Lab Recordings
@@ -26,3 +28,6 @@ f. Help students to learn about how to generate codes for target programming lan
     
 ### Lab2
     https://youtu.be/_EJHBAeILN8
+
+### Lab4
+    https://youtu.be/43L4LnPjzAo
