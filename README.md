@@ -17,11 +17,13 @@ f. Help students to learn about how to generate codes for target programming lan
 ## Lecture Vidoes
 
 ### SUE
-https://youtube.com/@sukarnasarker?si=cCVhnUdKe5QDQZ-Q
+    https://youtube.com/@sukarnasarker?si=cCVhnUdKe5QDQZ-Q
 
-### ABU Hanif Siam   https://youtube.com/playlist?list=PLsvKNqBM7Yn3Qa0UWQ_R2MzGFTkzCYYcj
+### ABU Hanif Siam
+     https://youtube.com/playlist?list=PLsvKNqBM7Yn3Qa0UWQ_R2MzGFTkzCYYcj
 
-### SBM   https://youtube.com/playlist?list=PLM9X445MI6QriAQH-8ncpZW9sXawsbj1B
+### SBM
+    https://youtube.com/playlist?list=PLM9X445MI6QriAQH-8ncpZW9sXawsbj1B
 
 
 ## Lab Recordings
