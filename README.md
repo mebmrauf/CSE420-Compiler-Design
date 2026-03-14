@@ -23,7 +23,7 @@ f. Help students to learn about how to generate codes for target programming lan
     https://youtube.com/playlist?list=PLsvKNqBM7Yn3Qa0UWQ_R2MzGFTkzCYYcj
 
 ### SBM
-   https://youtube.com/playlist?list=PLM9X445MI6QriAQH-8ncpZW9sXawsbj1B
+    https://youtube.com/playlist?list=PLM9X445MI6QriAQH-8ncpZW9sXawsbj1B
 
 
 ## Lab Recordings
