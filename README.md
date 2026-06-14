@@ -25,6 +25,9 @@ f. Help students to learn about how to generate codes for target programming lan
 ### SBM
     https://youtube.com/playlist?list=PLM9X445MI6QriAQH-8ncpZW9sXawsbj1B
 
+### Rakib Kibria
+    https://youtube.com/playlist?list=PLXfid7WbmqhB9VXiWGkwKbQm_hzvtivoW
+
 
 ## Lab Recordings
 
