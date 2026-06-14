@@ -37,5 +37,8 @@ f. Help students to learn about how to generate codes for target programming lan
 ### Lab2
     https://youtu.be/_EJHBAeILN8
 
+### Lab3
+    https://youtu.be/SV6iiyisj88
+
 ### Lab4
     https://youtu.be/43L4LnPjzAo
